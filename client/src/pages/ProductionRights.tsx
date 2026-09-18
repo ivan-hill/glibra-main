@@ -1,4 +1,5 @@
 import { Link } from "wouter";
+import { FormEvent, useState } from "react";
 import { FileText, ShieldCheck, Music2, Users, Building2, Video, Scale, ArrowLeft } from "lucide-react";
 
 const agreementGroups = [
@@ -51,6 +52,32 @@ const agreementGroups = [
 ];
 
 export default function ProductionRights() {
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    providerType: "",
+    propertyAvailable: false,
+    peopleAvailable: false,
+    notes: "",
+  });
+  const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+
+  async function submitInterest(event: FormEvent) {
+    event.preventDefault();
+    setStatus("saving");
+    try {
+      const response = await fetch("/api/production-rights", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!response.ok) throw new Error("Unable to save");
+      setStatus("saved");
+    } catch {
+      setStatus("error");
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#f7f7f5] text-slate-950">
       <header className="border-b border-slate-200 bg-white">
@@ -130,6 +157,93 @@ export default function ProductionRights() {
             </div>
           </div>
         </section>
+
+          <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-7 md:p-9">
+            <div className="max-w-3xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700">Optional provider participation</p>
+              <h2 className="mt-2 text-2xl font-semibold">Interested in appearing in Glibra content?</h2>
+              <p className="mt-3 text-sm leading-6 text-slate-600">
+                Hosts and local providers can tell us they are open to future filming, photography, interviews,
+                or location features. This does not authorize filming and is not required to join Glibra.
+              </p>
+            </div>
+
+            {status === "saved" ? (
+              <div className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
+                Thanks. Your production-interest preference has been saved. If a specific opportunity is a fit,
+                Glibra will contact you with the project details and the applicable agreement before filming.
+              </div>
+            ) : (
+              <form onSubmit={submitInterest} className="mt-6 grid gap-4 md:grid-cols-2">
+                <label className="text-sm font-medium text-slate-800">
+                  Name
+                  <input
+                    required
+                    className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal"
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  />
+                </label>
+                <label className="text-sm font-medium text-slate-800">
+                  Email
+                  <input
+                    required
+                    type="email"
+                    className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal"
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  />
+                </label>
+                <label className="text-sm font-medium text-slate-800 md:col-span-2">
+                  Provider type
+                  <input
+                    className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal"
+                    placeholder="Lodging, dining, winery, experience, transportation, photography..."
+                    value={form.providerType}
+                    onChange={(e) => setForm({ ...form, providerType: e.target.value })}
+                  />
+                </label>
+                <label className="flex items-start gap-3 rounded-xl border border-slate-200 p-4 text-sm text-slate-700">
+                  <input
+                    className="mt-1"
+                    type="checkbox"
+                    checked={form.propertyAvailable}
+                    onChange={(e) => setForm({ ...form, propertyAvailable: e.target.checked })}
+                  />
+                  My property or business location may be available for filming or photography.
+                </label>
+                <label className="flex items-start gap-3 rounded-xl border border-slate-200 p-4 text-sm text-slate-700">
+                  <input
+                    className="mt-1"
+                    type="checkbox"
+                    checked={form.peopleAvailable}
+                    onChange={(e) => setForm({ ...form, peopleAvailable: e.target.checked })}
+                  />
+                  I or members of my team may be interested in appearing in Glibra content.
+                </label>
+                <label className="text-sm font-medium text-slate-800 md:col-span-2">
+                  Notes
+                  <textarea
+                    className="mt-2 min-h-28 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal"
+                    placeholder="Optional details about your location, team, or availability"
+                    value={form.notes}
+                    onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                  />
+                </label>
+                <div className="md:col-span-2">
+                  <button
+                    disabled={status === "saving"}
+                    className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
+                  >
+                    {status === "saving" ? "Saving…" : "Submit production interest"}
+                  </button>
+                  {status === "error" && (
+                    <p className="mt-3 text-sm text-red-700">We couldn’t save this preference. Please try again.</p>
+                  )}
+                </div>
+              </form>
+            )}
+          </section>
       </main>
     </div>
   );
