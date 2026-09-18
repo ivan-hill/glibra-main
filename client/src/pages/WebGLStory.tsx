@@ -594,6 +594,7 @@ export default function WebGLStory() {
           <li><a href="#page-providers">Who Can Join</a></li>
           <li><a href="#page2">Travelers</a></li>
           <li><a href="#page-faq">FAQ</a></li>
+          <li><a href="/production-rights">Production Rights</a></li>
           <li><a href="mailto:ivan@glibra.com">Contact</a></li>
         </ul>
         <div className="de-footer-copy">©2025 Glibra Inc. · Geneva, NY · Finger Lakes Pilot Region</div>
