@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import authRoutes from "./routes/auth";
 import billingRoutes from "./routes/billing";
 import plansRoutes from "./routes/plans";
+import productionRightsRoutes from "./routes/productionRights";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -19,6 +20,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/auth-legacy', authRoutes);
   app.use('/api/billing', billingRoutes);
   app.use('/api/plans', plansRoutes);
+  app.use('/api/production-rights', productionRightsRoutes);
 
   // Legacy storage routes (if needed)
   // use storage to perform CRUD operations on the storage interface
