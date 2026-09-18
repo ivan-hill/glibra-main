@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { FormEvent, useState } from "react";
+import { useState, type FormEvent } from "react";
 import { FileText, ShieldCheck, Music2, Users, Building2, Video, Scale, ArrowLeft } from "lucide-react";
 
 const agreementGroups = [
@@ -158,7 +158,7 @@ export default function ProductionRights() {
           </div>
         </section>
 
-          <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-7 md:p-9">
+          <section className="mx-auto mb-16 mt-8 max-w-6xl rounded-2xl border border-slate-200 bg-white p-7 md:p-9">
             <div className="max-w-3xl">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700">Optional provider participation</p>
               <h2 className="mt-2 text-2xl font-semibold">Interested in appearing in Glibra content?</h2>
