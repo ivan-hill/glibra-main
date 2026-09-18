@@ -10,6 +10,8 @@ import WebGLStory from "@/pages/WebGLStory";
 import Pricing from "@/pages/Pricing";
 import CheckoutWizard from "@/pages/CheckoutWizard";
 import ProductionRights from "@/pages/ProductionRights";
+import ProductionSign from "@/pages/ProductionSign";
+import ProductionAdmin from "@/pages/ProductionAdmin";
 
 const Home = lazy(() => import("@/pages/home"));
 const HomeSimple = lazy(() => import("@/pages/home-simple"));
@@ -23,6 +25,8 @@ function Router() {
       <Route path="/pricing" component={Pricing} />
       <Route path="/checkout" component={CheckoutWizard} />
       <Route path="/production-rights" component={ProductionRights} />
+      <Route path="/production-sign/:token" component={ProductionSign} />
+      <Route path="/production-admin" component={ProductionAdmin} />
       <Route path="/premium">
         <Suspense fallback={null}>
           <HomePremium />
