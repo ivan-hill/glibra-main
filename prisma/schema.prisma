@@ -1,0 +1,152 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  role         Role     @default(TRAVELER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  subscriptions Subscription[]
+  credits      CreditLedger[]
+  bookings     Booking[]
+  provider     Provider?
+  
+  @@map("users")
+}
+
+model Subscription {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planCode          String   // e.g., TRAVELER_SILVER_MONTHLY, HOST_PRO_MONTHLY
+  stripeCustId      String
+  stripeSubId       String   @unique
+  status            String   // active, past_due, canceled, incomplete
+  startedAt         DateTime @default(now())
+  currentPeriodEnd  DateTime
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@map("subscriptions")
+}
+
+model CreditLedger {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  delta       Int      // positive for top-up, negative for consumption
+  reason      String   // "bundle.exec", "auto.topup", "manual.adjust", "subscription.grant"
+  balanceAfter Int
+  createdAt   DateTime @default(now())
+  
+  @@map("credit_ledger")
+}
+
+model Booking {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  providerId    String?
+  provider      Provider? @relation(fields: [providerId], references: [id])
+  status        String   // created, confirmed, canceled
+  subtotalCents Int
+  currency      String   @default("USD")
+  affiliateId   String?
+  totalCents    Int      // subtotal + fees
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  lineItems     LineItem[]
+  
+  @@map("bookings")
+}
+
+model LineItem {
+  id            String   @id @default(cuid())
+  bookingId     String
+  booking       Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  kind          String   // "service_fee" | "partner_commission" | "base" | "sponsored"
+  description   String
+  amountCents   Int
+  createdAt     DateTime @default(now())
+  
+  @@map("line_items")
+}
+
+model Provider {
+  id               String   @id @default(cuid())
+  userId           String?  @unique
+  user             User?    @relation(fields: [userId], references: [id])
+  name             String
+  tier             String   // "BASIC" | "PRO" | "ENTERPRISE"
+  sponsoredCredits Int      @default(0)
+  commissionRate   Float    @default(0.10) // 10% default commission
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  listings         Listing[]
+  bookings         Booking[]
+  
+  @@map("providers")
+}
+
+model Listing {
+  id          String   @id @default(cuid())
+  providerId  String
+  provider    Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  priceCents  Int
+  isSponsored Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("listings")
+}
+
+model Affiliate {
+  id          String   @id @default(cuid())
+  source      String   // utm_source
+  medium      String?  // utm_medium
+  campaign    String?  // utm_campaign
+  clickId     String   @unique
+  createdAt   DateTime @default(now())
+  
+  @@map("affiliates")
+}
+
+model PlanConfig {
+  id          String   @id @default(cuid())
+  planCode    String   @unique // e.g., TRAVELER_SILVER_MONTHLY
+  name        String   // e.g., "Traveler Silver"
+  description String?
+  priceCents  Int      // price in cents
+  interval    String   // "month" | "year"
+  role        Role     // TRAVELER | HOST
+  tier        String   // "FREE" | "SILVER" | "GOLD" | "BASIC" | "PRO" | "ENTERPRISE"
+  entitlements Json    // JSON object with plan features
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("plan_configs")
+}
+
+enum Role {
+  TRAVELER
+  HOST
+  ADMIN
+}
