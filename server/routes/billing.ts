@@ -271,7 +271,7 @@ async function handleCheckoutCompleted(session: any) {
         stripeCustId: session.customer,
         stripeSubId: session.subscription,
         status: stripeSubscription.status,
-        currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000),
+        currentPeriodEnd: new Date((stripeSubscription.items.data[0].current_period_end) * 1000),
       },
     });
 
@@ -288,7 +288,7 @@ async function handleSubscriptionUpdated(subscription: any) {
     where: { stripeSubId: subscription.id },
     data: {
       status: subscription.status,
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      currentPeriodEnd: new Date(subscription.items.data[0].current_period_end * 1000),
     },
   });
 }
